@@ -14,14 +14,9 @@ type EventProcessor struct {
 	ed EventDispatcher
 }
 
-func (ep *EventProcessor) Handle(msg []byte) error {
-	m := &messaging.Message{}
-	err := json.Unmarshal(msg, m)
-	if err != nil {
-		return err
-	}
+func (ep *EventProcessor) Handle(ctx context.Context, msg messaging.Message) error {
 
-	et := m.MessageType
+	et := msg.MessageType
 
 	factory := GetEventFactory(et)
 	if factory == nil {
@@ -29,12 +24,11 @@ func (ep *EventProcessor) Handle(msg []byte) error {
 	}
 
 	e := factory.NewEvent()
-	err = json.Unmarshal(m.Payload, e)
+	err := json.Unmarshal(msg.Payload, e)
 	if err != nil {
 		return EventHandlerNoFound
 	}
-	//todo: time out context
-	ctx := context.Background()
+
 	err = ep.ed.DispatchEvent(ctx, e)
 
 	if err != nil {

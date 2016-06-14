@@ -3,7 +3,7 @@ package event
 import (
 	"reflect"
 
-	"github.com/xozrc/eventsourcing/types"
+	"github.com/xozrc/cqrs/types"
 )
 
 //Event ...
