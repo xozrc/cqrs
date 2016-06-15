@@ -1,6 +1,8 @@
 package messaging
 
 import (
+	"log"
+
 	"golang.org/x/net/context"
 )
 
@@ -9,7 +11,8 @@ type MessageHandler interface {
 }
 
 type Processor struct {
-	mh MessageHandler
+	ctx context.Context
+	mh  MessageHandler
 }
 
 func (p *Processor) Handle(msg []byte) error {
@@ -18,16 +21,17 @@ func (p *Processor) Handle(msg []byte) error {
 	if err != nil {
 		return err
 	}
-	ctx := context.Background()
-	err = p.mh.Handle(ctx, m)
+	log.Printf("receive msg %#v\n", m)
+	err = p.mh.Handle(p.ctx, m)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func NewProcessor(mh MessageHandler) *Processor {
+func NewProcessor(ctx context.Context, mh MessageHandler) *Processor {
 	p := &Processor{}
+	p.ctx = ctx
 	p.mh = mh
 	return p
 }

@@ -6,6 +6,7 @@ import (
 
 type Sender interface {
 	Send([]byte) error
+	Close() error
 }
 
 type Receiver interface {

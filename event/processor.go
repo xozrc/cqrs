@@ -14,7 +14,7 @@ type EventProcessor struct {
 	ed EventDispatcher
 }
 
-func (ep *EventProcessor) Handle(ctx context.Context, msg messaging.Message) error {
+func (ep *EventProcessor) Handle(ctx context.Context, msg *messaging.Message) error {
 
 	et := msg.MessageType
 

@@ -10,7 +10,7 @@ import (
 )
 
 type Repository interface {
-	Find(id types.Guid, es EventSourced) (err error)
+	Find(es EventSourced) (err error)
 	Save(es EventSourced, correlationId string) error
 }
 
