@@ -3,8 +3,8 @@ package eventsourcing
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
 
+	cqrspkg "github.com/xozrc/cqrs/pkg"
 	"github.com/xozrc/cqrs/types"
 )
 
@@ -13,7 +13,7 @@ func GetPartitionKey1(sourceType string, id types.Guid) string {
 }
 
 func GetPartitionKey(es EventSourced) string {
-	st := reflect.TypeOf(es).Name()
+	st := cqrspkg.TypeName(es)
 	return fmt.Sprintf("%s_%d", st, es.Id())
 }
 
@@ -25,7 +25,7 @@ func ToData(st string, partitionKey string, e VersionedEvent) (*EventEntity, err
 	ed := &EventEntity{}
 	ed.PartitionKey = partitionKey
 	ed.SourceType = st
-	ed.EventType = reflect.TypeOf(e).Name()
+	ed.EventType = cqrspkg.TypeName(e)
 	//json endcode event
 	payload, err := json.Marshal(e)
 	if err != nil {

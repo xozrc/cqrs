@@ -1,89 +1,128 @@
 package main
 
 import (
+	"fmt"
 	"log"
-    "github.com/xozrc/cqrs/command"
+
+	"github.com/jinzhu/gorm"
+	"github.com/nsqio/go-nsq"
+	"github.com/xozrc/cqrs/command"
+	"github.com/xozrc/cqrs/eventsourcing"
+	ordercommand "github.com/xozrc/cqrs/eventsourcing/examples/order/command"
+	orderconstant "github.com/xozrc/cqrs/eventsourcing/examples/order/constant"
+	orderhandler "github.com/xozrc/cqrs/eventsourcing/examples/order/server/handler"
+	"github.com/xozrc/cqrs/eventsourcing/rdb"
 	"github.com/xozrc/cqrs/messaging"
 	messagingnsq "github.com/xozrc/cqrs/messaging/nsq"
-    "github.com/nsqio/go-nsq"
-    "github.com/xozrc/cqrs/eventsourcing"
-    orderconstant "github.com/xozrc/cqrs/eventsourcing/examples/order/constant"
-    "golang.org/x/net/context"
+	cqrspkg "github.com/xozrc/cqrs/pkg"
+	"golang.org/x/net/context"
 )
 
-const(
-    orderCommandTopic = "command_order"
-    orderCommandChannel = "command_order"
+const (
+	dialect  = "mysql"
+	user     = "root"
+	password = "root"
+	host     = "127.0.0.1:3306"
+	dbName   = "event_store_test"
+	charset  = "utf8"
+)
+
+const (
+	orderCommandTopic   = "command_order"
+	orderCommandChannel = "command_order"
 )
 
 var (
-    orderRepository *eventsourcing.EventSourcedRepository
-	orderCommandReceiver messaging.Receiver
-    orderCommandProcessor *command.CommandProcessor
-    done chan struct{}
-    
+	eventStore            eventsourcing.EventStore
+	orderRepository       *eventsourcing.EventSourcedRepository
+	orderCommandReceiver  messaging.Receiver
+	orderCommandProcessor *command.CommandProcessor
+	done                  chan struct{}
 )
 
+func initCommandReceiver() error {
+	nsqConfig := nsq.NewConfig()
+	c, err := nsq.NewConsumer(orderCommandTopic, orderCommandChannel, nsqConfig)
+	if err != nil {
+		return err
+	}
 
-func initCommandReceiver() error{
-    nsqConfig := nsq.NewConfig()
-    c,err:=nsq.NewConsumer(orderCommandTopic,orderCommandChannel,nsqConfig)
-    if err!=nil{
-        return err
-    }
-    
-    defer func(){
-       if err!=nil{
-           c.Stop()
-       } 
-    }()
+	defer func() {
+		if err != nil {
+			c.Stop()
+		}
+	}()
 
-    orderCommandReceiver, err = messagingnsq.NewConsumer(c,orderconstant.OrderCommandBusAddr)
-    if err != nil {
-        return err
-    }
-    
-   
-    return nil
+	orderCommandReceiver, err = messagingnsq.NewConsumer(c, orderconstant.OrderCommandBusAddr)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func initCommandProcessor() {
-    cd := command.NewCommandDispatcher()
-    orderCommandProcessor = command.NewCommandProcessor(cd)
+	cd := command.NewCommandDispatcher()
+
+	ct := cqrspkg.TypeName((*ordercommand.CreateOrder)(nil))
+
+	cd.Register(ct, command.CommandHandlerFunc(orderhandler.HandleCreateOrder))
+	orderCommandProcessor = command.NewCommandProcessor(cd)
+}
+
+func initEventStore() error {
+	dbArgs := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=%s", user, password, host, dbName, charset)
+	s, err := gorm.Open(dialect, dbArgs)
+	if err != nil {
+		return err
+	}
+
+	s.LogMode(true)
+	eventStore, err = rdb.NewStore(s)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func Start() {
-    done = make(chan struct{})
-     
-    err:=initCommandReceiver()
-    
-    if err!=nil{
-        log.Fatal("init command receiver ",err)
-    }
-    
-    initCommandProcessor()
-    
-    ctx := context.Background()
-    ctx = eventsourcing.WithRepository(ctx,orderRepository)
-    
-    tp := messaging.NewProcessor(ctx,orderCommandProcessor)
+	done = make(chan struct{})
+
+	err := initCommandReceiver()
+
+	if err != nil {
+		log.Fatal("init command receiver ", err)
+	}
+
+	initCommandProcessor()
+	err = initEventStore()
+
+	if err != nil {
+		log.Fatal("init event store ", err)
+	}
+
+	orderRepository = eventsourcing.NewRepository(eventStore)
+
+	ctx := context.Background()
+	ctx = eventsourcing.WithRepository(ctx, orderRepository)
+
+	tp := messaging.NewProcessor(ctx, orderCommandProcessor)
 	err = orderCommandReceiver.Start(tp)
-    if err!=nil{
-          log.Fatal(err)
-    }
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func Stop() {
 	orderCommandReceiver.Stop()
 }
 
-
-func main(){
-    Start()
-    <-done
+func main() {
+	Start()
+	<-done
 }
 
-func exit(){
-    t := struct{}{}
-    done<-t
+func exit() {
+	t := struct{}{}
+	done <- t
 }

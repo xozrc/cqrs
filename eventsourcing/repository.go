@@ -3,9 +3,10 @@ package eventsourcing
 import (
 	"encoding/json"
 	"errors"
-	"reflect"
+	"fmt"
 	"strconv"
 
+	cqrspkg "github.com/xozrc/cqrs/pkg"
 	"github.com/xozrc/cqrs/types"
 )
 
@@ -72,12 +73,12 @@ func (esr *EventSourcedRepository) Find(es EventSourced) (err error) {
 
 func (esr *EventSourcedRepository) Save(es EventSourced, correlationId string) error {
 
-	st := reflect.TypeOf(es).Name()
+	st := cqrspkg.TypeName(es)
 	partitionKey := GetPartitionKey(es)
 
 	tes := es.Events()
 
-	eds := make([]*EventEntity, len(tes))
+	eds := make([]*EventEntity, 0, len(tes))
 	for _, e := range tes {
 		ed, err := ToData(st, partitionKey, e)
 		if err != nil {
@@ -85,7 +86,7 @@ func (esr *EventSourcedRepository) Save(es EventSourced, correlationId string) e
 		}
 		eds = append(eds, ed)
 	}
-
+	fmt.Printf("%#v\n", eds)
 	//save in store
 	err := esr.es.Save(partitionKey, eds)
 	if err != nil {

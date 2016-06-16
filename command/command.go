@@ -1,8 +1,7 @@
 package command
 
 import (
-	"reflect"
-
+	cqrspkg "github.com/xozrc/cqrs/pkg"
 	"github.com/xozrc/cqrs/types"
 	"golang.org/x/net/context"
 )
@@ -52,10 +51,8 @@ var (
 
 func init() {
 	commandFactoryMap = make(map[string]CommandFactory)
-
-	triviKey := reflect.TypeOf((*TrivialCommand)(nil)).Name()
-	RegisterCommandFactory(triviKey, CommandFactoryFunc(NewCommand))
-
+	triKey := cqrspkg.TypeName((*TrivialCommand)(nil))
+	RegisterCommandFactory(triKey, CommandFactoryFunc(NewCommand))
 }
 
 func RegisterCommandFactory(key string, vef CommandFactory) {

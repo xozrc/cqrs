@@ -1,8 +1,7 @@
 package event
 
 import (
-	"reflect"
-
+	cqrspkg "github.com/xozrc/cqrs/pkg"
 	"github.com/xozrc/cqrs/types"
 )
 
@@ -40,9 +39,8 @@ var (
 
 func init() {
 	eventFactoryMap = make(map[string]EventFactory)
-
-	triviKey := reflect.TypeOf((*TrivialEvent)(nil)).Name()
-	RegisterEventFactory(triviKey, EventFactoryFunc(NewEvent))
+	triKey := cqrspkg.TypeName((*TrivialEvent)(nil))
+	RegisterEventFactory(triKey, EventFactoryFunc(NewEvent))
 
 }
 

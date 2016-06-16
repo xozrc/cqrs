@@ -1,8 +1,8 @@
-package order
+package eventsourcing
 
 import (
 	"github.com/xozrc/cqrs/eventsourcing"
-	orderevent "github.com/xozrc/cqrs/eventsourcing/example/event"
+	orderevent "github.com/xozrc/cqrs/eventsourcing/examples/order/event"
 	"github.com/xozrc/cqrs/types"
 )
 
@@ -34,7 +34,7 @@ func (o *Order) Version() int64 {
 
 func (o *Order) ApplyEvent(ve eventsourcing.VersionedEvent) error {
 	switch ve.(type) {
-	case OrderInit:
+	case *orderevent.OrderInit:
 		o.Status = OrderInit
 		return nil
 	}

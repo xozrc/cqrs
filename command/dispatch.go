@@ -2,13 +2,14 @@ package command
 
 import (
 	"errors"
-	"reflect"
+	"log"
 
+	cqrspkg "github.com/xozrc/cqrs/pkg"
 	"golang.org/x/net/context"
 )
 
 var (
-	CommandHandlerNoFound = errors.New("event handler no found")
+	CommandHandlerNoFound = errors.New("command handler no found")
 )
 
 const (
@@ -25,8 +26,8 @@ type commandDispatcher struct {
 }
 
 func (cd *commandDispatcher) DispatchCommand(ctx context.Context, c Command) error {
-	et := reflect.TypeOf(c).Name()
-
+	et := cqrspkg.TypeName(c)
+	log.Printf("%#v\n", cd.handlersMap)
 	h, ok := cd.handlersMap[et]
 	if !ok {
 		return CommandHandlerNoFound

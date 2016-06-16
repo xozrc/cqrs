@@ -15,9 +15,16 @@ type Processor struct {
 	mh  MessageHandler
 }
 
-func (p *Processor) Handle(msg []byte) error {
+func (p *Processor) Handle(msg []byte) (err error) {
+
+	// defer func() {
+	// 	if r := recover(); r != nil {
+	// 		err = fmt.Errorf("recover error: %v", r)
+	// 	}
+	// }()
+
 	m := &Message{}
-	err := m.UnmarshalBinary(msg)
+	err = m.UnmarshalBinary(msg)
 	if err != nil {
 		return err
 	}
@@ -26,7 +33,7 @@ func (p *Processor) Handle(msg []byte) error {
 	if err != nil {
 		return err
 	}
-	return nil
+	return err
 }
 
 func NewProcessor(ctx context.Context, mh MessageHandler) *Processor {
