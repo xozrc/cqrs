@@ -84,6 +84,7 @@ func (esr *EventSourcedRepository) Save(es EventSourced, correlationId string) e
 		if err != nil {
 			return err
 		}
+		ed.CorrelationId = correlationId
 		eds = append(eds, ed)
 	}
 	fmt.Printf("%#v\n", eds)

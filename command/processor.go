@@ -9,24 +9,27 @@ import (
 	"golang.org/x/net/context"
 )
 
+//CommandProcessor implements messaging.MessageHandler
 type CommandProcessor struct {
-	cd CommandDispatcher
+	cd CommandDispatcher //dispatcher
 }
 
+//Handle process message to command, then dispatch command to CommandHandler
 func (cp *CommandProcessor) Handle(ctx context.Context, msg *messaging.Message) error {
 
 	et := msg.MessageType
 
 	factory := GetCommandFactory(et)
 	if factory == nil {
-		return CommandHandlerNoFound
+		return CommandFactoryNoFound
 	}
 
 	cId := types.NewGuid()
+
 	c := factory.NewCommand(cId)
 	err := json.Unmarshal(msg.Payload, c)
 	if err != nil {
-		return CommandHandlerNoFound
+		return err
 	}
 
 	log.Printf("receive command %#v\n", c)
@@ -39,6 +42,7 @@ func (cp *CommandProcessor) Handle(ctx context.Context, msg *messaging.Message) 
 	return nil
 }
 
+//NewCommandProcessor constructor CommandProject object
 func NewCommandProcessor(cd CommandDispatcher) *CommandProcessor {
 	cp := &CommandProcessor{}
 	cp.cd = cd

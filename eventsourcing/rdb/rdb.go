@@ -26,6 +26,7 @@ func (res *RdbEventStore) Save(partitionKey string, events []*eventsourcing.Even
 
 	for _, e := range events {
 		e.PartitionKey = partitionKey
+
 		tdb := res.db.Create(e)
 		if tdb.Error != nil {
 			return tdb.Error

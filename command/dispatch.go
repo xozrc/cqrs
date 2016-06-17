@@ -2,7 +2,6 @@ package command
 
 import (
 	"errors"
-	"log"
 
 	cqrspkg "github.com/xozrc/cqrs/pkg"
 	"golang.org/x/net/context"
@@ -27,7 +26,6 @@ type commandDispatcher struct {
 
 func (cd *commandDispatcher) DispatchCommand(ctx context.Context, c Command) error {
 	et := cqrspkg.TypeName(c)
-	log.Printf("%#v\n", cd.handlersMap)
 	h, ok := cd.handlersMap[et]
 	if !ok {
 		return CommandHandlerNoFound

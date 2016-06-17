@@ -49,6 +49,7 @@ func NewCommandBus(sender messaging.Sender) CommandBus {
 	return cb
 }
 
+//buildMessage
 func buildMessage(cmd Command) (m *messaging.Message, err error) {
 	m = &messaging.Message{}
 	m.CorrelationId = fmt.Sprintf("%s", cmd.Id())
@@ -58,7 +59,6 @@ func buildMessage(cmd Command) (m *messaging.Message, err error) {
 	if err != nil {
 		return
 	}
-	fmt.Println(m.MessageType)
 	m.Payload = bs
 	return
 }
