@@ -6,16 +6,16 @@ import (
 )
 
 type CreateOrder struct {
-	id types.Guid
+	CId types.Guid `json:"id"`
 }
 
 func (co *CreateOrder) Id() types.Guid {
-	return co.id
+	return co.CId
 }
 
 func NewCreateOrder(id types.Guid) command.Command {
 	return &CreateOrder{
-		id: id,
+		CId: id,
 	}
 }
 

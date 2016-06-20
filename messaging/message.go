@@ -19,7 +19,7 @@ type Handler interface {
 }
 
 type Message struct {
-	Id            string `json:"id"`
+	Id            string `json:"id"`  
 	MessageType   string `json:"message_type"`
 	Payload       []byte `json:"payload"`
 	CorrelationId string `json:"correlation_id"`
