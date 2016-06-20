@@ -2,7 +2,6 @@ package command
 
 import (
 	"github.com/xozrc/cqrs/command"
-	cqrspkg "github.com/xozrc/cqrs/pkg"
 	"github.com/xozrc/cqrs/types"
 )
 
@@ -21,6 +20,5 @@ func NewCreateOrder(id types.Guid) command.Command {
 }
 
 func init() {
-	createOrderTyp := cqrspkg.TypeName((*CreateOrder)(nil))
-	command.RegisterCommandFactory(createOrderTyp, command.CommandFactoryFunc(NewCreateOrder))
+	command.RegisterCommand((*CreateOrder)(nil))
 }

@@ -1,6 +1,8 @@
 package eventsourcing
 
 import (
+	"errors"
+
 	"github.com/xozrc/cqrs/eventsourcing"
 	orderevent "github.com/xozrc/cqrs/eventsourcing/examples/order/event"
 	"github.com/xozrc/cqrs/types"
@@ -35,6 +37,11 @@ func (o *Order) Version() int64 {
 func (o *Order) ApplyEvent(ve eventsourcing.VersionedEvent) error {
 	switch ve.(type) {
 	case *orderevent.OrderInit:
+		e, ok := ve.(*orderevent.OrderInit)
+		if !ok {
+			return errors.New("null order init")
+		}
+		o.id = e.SourceId()
 		o.Status = OrderInit
 		return nil
 	}

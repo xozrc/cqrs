@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/xozrc/cqrs/messaging"
-	"github.com/xozrc/cqrs/types"
 	"golang.org/x/net/context"
 )
 
@@ -19,15 +18,12 @@ func (cp *CommandProcessor) Handle(ctx context.Context, msg *messaging.Message) 
 
 	et := msg.MessageType
 
-	factory := GetCommandFactory(et)
-	if factory == nil {
-		return CommandFactoryNoFound
+	c, err := NewCommand(et)
+	if err != nil {
+		return err
 	}
 
-	cId := types.NewGuid()
-
-	c := factory.NewCommand(cId)
-	err := json.Unmarshal(msg.Payload, c)
+	err = json.Unmarshal(msg.Payload, c)
 	if err != nil {
 		return err
 	}
