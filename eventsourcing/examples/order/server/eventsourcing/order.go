@@ -12,9 +12,8 @@ type OrderStatus int
 
 const (
 	OrderInit OrderStatus = iota
-	OrderPending
-	OrderConfirm
-	OrderVerify
+	OrderReserved
+	OrderConfirmed
 	OrderCancelled
 )
 
@@ -57,24 +56,29 @@ func (o *Order) Payload() []byte {
 }
 
 func (o *Order) Cancel() error {
-	o.Status = OrderCancelled
-	return nil
-}
-
-func (o *Order) Pending() error {
-	o.Status = OrderPending
-	return nil
-}
-
-func (o *Order) Verify() error {
-	o.Status = OrderVerify
-	return nil
+	ver := o.version + 1
+	ie := orderevent.NewOrderCancelled(o.Id(), ver)
+	return o.updateEvent(ie)
 }
 
 func (o *Order) Init(id types.Guid) error {
 	ver := o.version + 1
 	ie := orderevent.NewOrderInit(id, ver)
 	return o.updateEvent(ie)
+}
+
+func (o *Order) Reserve() error {
+	ver := o.version + 1
+	ie := orderevent.NewOrderReserved(o.Id(), ver)
+	return o.updateEvent(ie)
+}
+
+func (o *Order) Confirm(paymentId types.Guid) error {
+	ver := o.version + 1
+	ie := orderevent.NewOrderConfirmed(o.Id(), ver)
+	tIe, _ := ie.(*orderevent.OrderConfirmed)
+	tIe.PaymentId = paymentId
+	return o.updateEvent(tIe)
 }
 
 func (o *Order) updateEvent(ve eventsourcing.VersionedEvent) error {

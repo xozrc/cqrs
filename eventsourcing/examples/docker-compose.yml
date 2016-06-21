@@ -1,0 +1,31 @@
+version: "2"
+services:
+    nsqlookupd:
+        image: "nsqio/nsq:v0.3.8"
+        ports:
+            - "4160:4160"
+            - "4161:4161"
+        command: 
+            - "/nsqlookupd"
+    nsqd:
+        image: nsqio/nsq:v0.3.8
+        ports: 
+            - "4150:4150"
+            - "4151:4151"
+        command: 
+            - "/nsqd"
+            - "--lookupd-tcp-address=192.168.99.100:4160"
+        links: 
+            - nsqlookupd
+    nsqdadmin:
+        image: nsqio/nsq:v0.3.8
+        ports: 
+            - "4170:4170"
+            - "4171:4171"
+        command: 
+            - "/nsqadmin"
+            - "--lookupd-http-address=192.168.99.100:4161"
+        links: 
+            - nsqlookupd
+        
+
