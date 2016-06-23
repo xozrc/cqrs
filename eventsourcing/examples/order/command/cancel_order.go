@@ -2,25 +2,32 @@ package command
 
 import (
 	"github.com/xozrc/cqrs/command"
+	cqrspkg "github.com/xozrc/cqrs/pkg"
 	"github.com/xozrc/cqrs/types"
 )
 
 type CancelOrder struct {
-	CId     types.Guid `json:"id"`
+	id      types.Guid
 	OrderId types.Guid `json:"order_id"`
 }
 
 func (co *CancelOrder) Id() types.Guid {
-	return co.CId
+	return co.id
 }
 
-func NewCancelOrder(id types.Guid, orderId types.Guid) command.Command {
+func NewCancelOrder(id types.Guid) command.Command {
 	return &CancelOrder{
-		CId:     id,
+		id: id,
+	}
+}
+func NewCancelOrder1(id types.Guid, orderId types.Guid) command.Command {
+	return &CancelOrder{
+		id:      id,
 		OrderId: orderId,
 	}
 }
 
 func init() {
-	command.RegisterCommand((*CancelOrder)(nil))
+	key := cqrspkg.TypeName((*CancelOrder)(nil))
+	command.RegisterCommand(key, command.CommandFactoryFunc(NewCancelOrder))
 }

@@ -10,8 +10,12 @@ import (
 	"github.com/xozrc/cqrs/types"
 )
 
+var (
+	EventSourcedNoFound = errors.New("eventsoucing no found")
+)
+
 type Repository interface {
-	Find(es EventSourced) (err error)
+	Find(id types.Guid, es EventSourced) (err error)
 	Save(es EventSourced, correlationId string) error
 }
 
@@ -20,15 +24,22 @@ type EventSourcedRepository struct {
 	//event sender
 }
 
-func (esr *EventSourcedRepository) Find(es EventSourced) (err error) {
+func (esr *EventSourcedRepository) Find(id types.Guid, es EventSourced) (err error) {
 
 	//todo: read from cache
 	var tv int64 = 0
 
-	partitionKey := GetPartitionKey(es)
+	st := cqrspkg.TypeName(es)
+
+	partitionKey := GetPartitionKey(st, id)
 
 	teds, err := esr.es.Load(partitionKey, tv)
 	if err != nil {
+		return
+	}
+
+	if len(teds) == 0 {
+		err = EventSourcedNoFound
 		return
 	}
 
@@ -74,7 +85,7 @@ func (esr *EventSourcedRepository) Find(es EventSourced) (err error) {
 func (esr *EventSourcedRepository) Save(es EventSourced, correlationId string) error {
 
 	st := cqrspkg.TypeName(es)
-	partitionKey := GetPartitionKey(es)
+	partitionKey := GetPartitionKey(st, es.Id())
 
 	tes := es.Events()
 

@@ -11,26 +11,28 @@ type Event interface {
 }
 
 type EventFactory interface {
-	NewEvent() Event
+	NewEvent(id types.Guid) Event
 }
 
-type EventFactoryFunc func() Event
+type EventFactoryFunc func(id types.Guid) Event
 
-func (veff EventFactoryFunc) NewEvent() Event {
-	return veff()
+func (veff EventFactoryFunc) NewEvent(id types.Guid) Event {
+	return veff(id)
 }
 
 //trivival versioned event
 type TrivialEvent struct {
-	sourceId types.Guid `json:"source_id"`
+	sourceId types.Guid
 }
 
 func (te *TrivialEvent) SourceId() types.Guid {
 	return te.sourceId
 }
 
-func NewEvent() Event {
-	return &TrivialEvent{}
+func NewEvent(id types.Guid) Event {
+	return &TrivialEvent{
+		sourceId: id,
+	}
 }
 
 var (

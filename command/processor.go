@@ -3,8 +3,10 @@ package command
 import (
 	"encoding/json"
 	"log"
+	"strconv"
 
 	"github.com/xozrc/cqrs/messaging"
+	cqrstypes "github.com/xozrc/cqrs/types"
 	"golang.org/x/net/context"
 )
 
@@ -18,7 +20,12 @@ func (cp *CommandProcessor) Handle(ctx context.Context, msg *messaging.Message) 
 
 	et := msg.MessageType
 
-	c, err := NewCommand(et)
+	id, err := strconv.ParseInt(msg.CorrelationId, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	c, err := NewCommand(et, cqrstypes.Guid(id))
 	if err != nil {
 		return err
 	}

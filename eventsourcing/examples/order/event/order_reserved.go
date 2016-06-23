@@ -1,8 +1,6 @@
 package event
 
 import (
-	"reflect"
-
 	"github.com/xozrc/cqrs/eventsourcing"
 	cqrspkg "github.com/xozrc/cqrs/pkg"
 	eventsourcingtypes "github.com/xozrc/cqrs/types"
@@ -29,6 +27,6 @@ func NewOrderReserved(sourceId eventsourcingtypes.Guid, version int64) eventsour
 }
 
 func init() {
-	orderReservedEventKey := cqrspkg.TypeName(reflect.TypeOf((*OrderReserved)(nil)))
+	orderReservedEventKey := cqrspkg.TypeName((*OrderReserved)(nil))
 	eventsourcing.RegisterVersionEventFactory(orderReservedEventKey, eventsourcing.VersionEventFactoryFunc(NewOrderReserved))
 }

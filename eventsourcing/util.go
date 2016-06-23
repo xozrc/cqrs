@@ -8,13 +8,8 @@ import (
 	"github.com/xozrc/cqrs/types"
 )
 
-func GetPartitionKey1(sourceType string, id types.Guid) string {
+func GetPartitionKey(sourceType string, id types.Guid) string {
 	return fmt.Sprintf("%s_%d", sourceType, id)
-}
-
-func GetPartitionKey(es EventSourced) string {
-	st := cqrspkg.TypeName(es)
-	return fmt.Sprintf("%s_%d", st, es.Id())
 }
 
 func snapShotEventSourced(es *EventSourced) (bs []byte, err error) {

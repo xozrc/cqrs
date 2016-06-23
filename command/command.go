@@ -2,24 +2,22 @@ package command
 
 import (
 	"errors"
-	"reflect"
 
 	"golang.org/x/net/context"
 
-	cqrspkg "github.com/xozrc/cqrs/pkg"
 	"github.com/xozrc/cqrs/types"
 )
 
 var (
-	commandTypeMap map[string]reflect.Type
+	commandFactoryMap map[string]CommandFactory
 )
 
 var (
-	CommandTypeNoFound = errors.New("command type no found")
+	CommandFactoryNoFound = errors.New("command factory no found")
 )
 
 func init() {
-	commandTypeMap = make(map[string]reflect.Type)
+	commandFactoryMap = make(map[string]CommandFactory)
 }
 
 //Command
@@ -27,25 +25,27 @@ type Command interface {
 	Id() types.Guid
 }
 
-func RegisterCommand(cmd Command) {
-	key := cqrspkg.TypeName(cmd)
-	typ := reflect.TypeOf(cmd).Elem()
-	commandTypeMap[key] = typ
+type CommandFactory interface {
+	NewCommand(id types.Guid) Command
 }
 
-func NewCommand(key string) (cmd Command, err error) {
-	typ, ok := commandTypeMap[key]
-	if !ok {
-		err = CommandTypeNoFound
-		return
-	}
-	val := reflect.New(typ)
+type CommandFactoryFunc func(id types.Guid) Command
 
-	cmd, ok = val.Interface().(Command)
+func (veff CommandFactoryFunc) NewCommand(id types.Guid) Command {
+	return veff(id)
+}
+
+func RegisterCommand(key string, cf CommandFactory) {
+	commandFactoryMap[key] = cf
+}
+
+func NewCommand(key string, id types.Guid) (cmd Command, err error) {
+	factory, ok := commandFactoryMap[key]
 	if !ok {
-		err = errors.New("assert error")
+		err = CommandFactoryNoFound
 		return
 	}
+	cmd = factory.NewCommand(id)
 	return
 }
 

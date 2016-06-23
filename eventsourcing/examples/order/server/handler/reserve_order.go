@@ -13,7 +13,7 @@ import (
 
 //HandleCreateOrder is a handler for create order command
 func HandleReserveOrder(ctx context.Context, cmd command.Command) error {
-	cmd, ok := cmd.(*ordercommand.ReserveOrder)
+	cmd1, ok := cmd.(*ordercommand.ReserveOrder)
 	if !ok {
 		return errors.New("command error")
 	}
@@ -24,7 +24,7 @@ func HandleReserveOrder(ctx context.Context, cmd command.Command) error {
 		return errors.New("repo no exist")
 	}
 	order := ordereventsourcing.NewOrder()
-	err := repo.Find(order)
+	err := repo.Find(cmd1.OrderId, order)
 	if err != nil {
 		return err
 	}
@@ -32,7 +32,7 @@ func HandleReserveOrder(ctx context.Context, cmd command.Command) error {
 	if err != nil {
 		return err
 	}
-	cId := fmt.Sprintf("%d", cmd.Id())
+	cId := fmt.Sprintf("%d", cmd1.Id())
 	err = repo.Save(order, cId)
 	if err != nil {
 		return err

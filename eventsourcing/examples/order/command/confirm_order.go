@@ -2,27 +2,35 @@ package command
 
 import (
 	"github.com/xozrc/cqrs/command"
+	cqrspkg "github.com/xozrc/cqrs/pkg"
 	"github.com/xozrc/cqrs/types"
 )
 
 type ConfirmOrder struct {
-	CId       types.Guid `json:"id"`
+	id        types.Guid
 	OrderId   types.Guid `json:"order_id"`
 	PaymentId types.Guid `json:"payment_id"`
 }
 
 func (co *ConfirmOrder) Id() types.Guid {
-	return co.CId
+	return co.id
 }
 
-func NewConfirmOrder(id types.Guid, orderId types.Guid, paymentId types.Guid) command.Command {
+func NewConfirmOrder(id types.Guid) command.Command {
 	return &ConfirmOrder{
-		CId:       id,
+		id: id,
+	}
+}
+
+func NewConfirmOrder1(id types.Guid, orderId types.Guid, paymentId types.Guid) command.Command {
+	return &ConfirmOrder{
+		id:        id,
 		OrderId:   orderId,
 		PaymentId: paymentId,
 	}
 }
 
 func init() {
-	command.RegisterCommand((*ConfirmOrder)(nil))
+	key := cqrspkg.TypeName((*ConfirmOrder)(nil))
+	command.RegisterCommand(key, command.CommandFactoryFunc(NewConfirmOrder))
 }

@@ -51,7 +51,7 @@ var (
 func init() {
 	versionEventFactoryMap = make(map[string]VersionEventFactory)
 
-	triviKey := reflect.TypeOf((*TrivialVersionedEvent)(nil)).Name()
+	triviKey := reflect.TypeOf((*TrivialVersionedEvent)(nil)).Elem().Name()
 	RegisterVersionEventFactory(triviKey, VersionEventFactoryFunc(NewVersionEvent))
 }
 

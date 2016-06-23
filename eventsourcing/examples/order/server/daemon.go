@@ -67,6 +67,9 @@ func initCommandProcessor() {
 	ct := cqrspkg.TypeName((*ordercommand.CreateOrder)(nil))
 
 	cd.Register(ct, command.CommandHandlerFunc(orderhandler.HandleCreateOrder))
+	ct2 := cqrspkg.TypeName((*ordercommand.CancelOrder)(nil))
+	cd.Register(ct2, command.CommandHandlerFunc(orderhandler.HandleCancelOrder))
+
 	orderCommandProcessor = command.NewCommandProcessor(cd)
 }
 

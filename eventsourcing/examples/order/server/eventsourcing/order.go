@@ -36,15 +36,36 @@ func (o *Order) Version() int64 {
 func (o *Order) ApplyEvent(ve eventsourcing.VersionedEvent) error {
 	switch ve.(type) {
 	case *orderevent.OrderInit:
-		e, ok := ve.(*orderevent.OrderInit)
-		if !ok {
-			return errors.New("null order init")
+		{
+			e, ok := ve.(*orderevent.OrderInit)
+			if !ok {
+				return errors.New("null order init")
+			}
+			o.init(e.SourceId())
+			goto Version
 		}
-		o.id = e.SourceId()
-		o.Status = OrderInit
-		return nil
+	case *orderevent.OrderCancelled:
+		{
+			_, ok := ve.(*orderevent.OrderCancelled)
+			if !ok {
+				return errors.New("null order cancel")
+			}
+			o.cancel()
+			goto Version
+		}
 	}
+Version:
+	o.version = ve.Version()
 	return nil
+}
+
+func (o *Order) init(id types.Guid) {
+	o.id = id
+	o.Status = OrderInit
+}
+
+func (o *Order) cancel() {
+	o.Status = OrderCancelled
 }
 
 func (o *Order) Events() []eventsourcing.VersionedEvent {
@@ -56,6 +77,9 @@ func (o *Order) Payload() []byte {
 }
 
 func (o *Order) Cancel() error {
+	if o.Status == OrderCancelled {
+		return nil
+	}
 	ver := o.version + 1
 	ie := orderevent.NewOrderCancelled(o.Id(), ver)
 	return o.updateEvent(ie)

@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-import(
+import (
 	"github.com/xozrc/cqrs/messaging"
 	cqrspkg "github.com/xozrc/cqrs/pkg"
 	"github.com/xozrc/cqrs/types"

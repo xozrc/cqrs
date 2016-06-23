@@ -3,11 +3,9 @@ package event
 import (
 	"encoding/json"
 
-	"golang.org/x/net/context"
-)
-
-import (
 	"github.com/xozrc/cqrs/messaging"
+	"github.com/xozrc/cqrs/types"
+	"golang.org/x/net/context"
 )
 
 type EventProcessor struct {
@@ -22,8 +20,8 @@ func (ep *EventProcessor) Handle(ctx context.Context, msg *messaging.Message) er
 	if factory == nil {
 		return EventHandlerNoFound
 	}
-
-	e := factory.NewEvent()
+	id := types.NewGuid()
+	e := factory.NewEvent(id)
 	err := json.Unmarshal(msg.Payload, e)
 	if err != nil {
 		return EventHandlerNoFound

@@ -1,8 +1,6 @@
 package event
 
 import (
-	"reflect"
-
 	"github.com/xozrc/cqrs/eventsourcing"
 	cqrspkg "github.com/xozrc/cqrs/pkg"
 	eventsourcingtypes "github.com/xozrc/cqrs/types"
@@ -30,6 +28,6 @@ func NewOrderConfirmed(sourceId eventsourcingtypes.Guid, version int64) eventsou
 }
 
 func init() {
-	orderConfirmedEventKey := cqrspkg.TypeName(reflect.TypeOf((*OrderConfirmed)(nil)))
+	orderConfirmedEventKey := cqrspkg.TypeName((*OrderConfirmed)(nil))
 	eventsourcing.RegisterVersionEventFactory(orderConfirmedEventKey, eventsourcing.VersionEventFactoryFunc(NewOrderConfirmed))
 }

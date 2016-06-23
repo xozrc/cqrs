@@ -13,7 +13,7 @@ import (
 
 //HandleCreateOrder is a handler for create order command
 func HandleConfirmOrder(ctx context.Context, cmd command.Command) error {
-	tcmd, ok := cmd.(*ordercommand.ConfirmOrder)
+	cmd1, ok := cmd.(*ordercommand.ConfirmOrder)
 	if !ok {
 		return errors.New("command error")
 	}
@@ -25,15 +25,15 @@ func HandleConfirmOrder(ctx context.Context, cmd command.Command) error {
 	}
 
 	order := ordereventsourcing.NewOrder()
-	err := repo.Find(order)
+	err := repo.Find(cmd1.OrderId, order)
 	if err != nil {
 		return err
 	}
-	err = order.Confirm(tcmd.PaymentId)
+	err = order.Confirm(cmd1.PaymentId)
 	if err != nil {
 		return err
 	}
-	cId := fmt.Sprintf("%d", tcmd.Id())
+	cId := fmt.Sprintf("%d", cmd1.Id())
 	err = repo.Save(order, cId)
 	if err != nil {
 		return err

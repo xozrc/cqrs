@@ -8,13 +8,12 @@ import (
 	"github.com/xozrc/cqrs/eventsourcing"
 	ordercommand "github.com/xozrc/cqrs/eventsourcing/examples/order/command"
 	ordereventsourcing "github.com/xozrc/cqrs/eventsourcing/examples/order/server/eventsourcing"
-	"github.com/xozrc/cqrs/types"
 	"golang.org/x/net/context"
 )
 
 //HandleCreateOrder is a handler for create order command
 func HandleCreateOrder(ctx context.Context, cmd command.Command) error {
-	cmd, ok := cmd.(*ordercommand.CreateOrder)
+	cmd1, ok := cmd.(*ordercommand.CreateOrder)
 	if !ok {
 		return errors.New("command error")
 	}
@@ -24,10 +23,14 @@ func HandleCreateOrder(ctx context.Context, cmd command.Command) error {
 	if repo == nil {
 		return errors.New("repo no exist")
 	}
-
-	id := types.NewGuid()
 	order := ordereventsourcing.NewOrder()
-	err := order.Init(id)
+	//check if order already exist
+	err := repo.Find(cmd1.OrderId, order)
+	if err != nil && err != eventsourcing.EventSourcedNoFound {
+		return err
+	}
+
+	err = order.Init(cmd1.OrderId)
 	if err != nil {
 		return err
 	}

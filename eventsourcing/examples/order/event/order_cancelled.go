@@ -1,9 +1,8 @@
 package event
 
 import (
-	"reflect"
-
 	"github.com/xozrc/cqrs/eventsourcing"
+	cqrspkg "github.com/xozrc/cqrs/pkg"
 	eventsourcingtypes "github.com/xozrc/cqrs/types"
 )
 
@@ -28,6 +27,6 @@ func NewOrderCancelled(sourceId eventsourcingtypes.Guid, version int64) eventsou
 }
 
 func init() {
-	cancelEventKey := reflect.TypeOf((*OrderCancelled)(nil)).Name()
+	cancelEventKey := cqrspkg.TypeName((*OrderCancelled)(nil))
 	eventsourcing.RegisterVersionEventFactory(cancelEventKey, eventsourcing.VersionEventFactoryFunc(NewOrderCancelled))
 }
