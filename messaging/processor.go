@@ -1,7 +1,9 @@
 package messaging
 
 import (
-	"log"
+	log "github.com/Sirupsen/logrus"
+
+	"time"
 
 	"golang.org/x/net/context"
 )
@@ -23,12 +25,19 @@ func (p *Processor) Handle(msg []byte) (err error) {
 	// 	}
 	// }()
 
+	now := time.Now().UnixNano()
+	defer func() {
+		now = time.Now().UnixNano() - now
+		log.Printf("message handler cost %d ns", now)
+	}()
+
 	m := &Message{}
 	err = m.UnmarshalBinary(msg)
 	if err != nil {
 		return err
 	}
-	log.Printf("receive msg %#v\n", m)
+
+	log.Debugf("receive msg %#v\n", m)
 	err = p.mh.Handle(p.ctx, m)
 	if err != nil {
 		return err

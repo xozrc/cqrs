@@ -2,8 +2,9 @@ package command
 
 import (
 	"encoding/json"
-	"log"
 	"strconv"
+
+	log "github.com/Sirupsen/logrus"
 
 	"github.com/xozrc/cqrs/messaging"
 	cqrstypes "github.com/xozrc/cqrs/types"
@@ -35,7 +36,7 @@ func (cp *CommandProcessor) Handle(ctx context.Context, msg *messaging.Message) 
 		return err
 	}
 
-	log.Printf("receive command %#v\n", c)
+	log.Debugf("receive command %#v\n", c)
 	err = cp.cd.DispatchCommand(ctx, c)
 
 	if err != nil {

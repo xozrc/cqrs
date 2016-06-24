@@ -3,7 +3,8 @@ package command
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 import (
@@ -34,7 +35,7 @@ func (cb *commandBus) Publish(c Command) error {
 		return err
 	}
 
-	log.Printf("build message %#v\n", m)
+	log.Debugf("build message %#v\n", m)
 
 	bs, err := m.MarshalBinary()
 	if err != nil {

@@ -2,7 +2,11 @@ package main
 
 import (
 	"fmt"
-	"log"
+
+	log "github.com/Sirupsen/logrus"
+
+	"net/http"
+	_ "net/http/pprof"
 
 	"github.com/jinzhu/gorm"
 	"github.com/nsqio/go-nsq"
@@ -42,6 +46,8 @@ var (
 
 func initCommandReceiver() error {
 	nsqConfig := nsq.NewConfig()
+
+	nsqConfig.MaxInFlight = 1000
 	c, err := nsq.NewConsumer(orderCommandTopic, orderCommandChannel, nsqConfig)
 	if err != nil {
 		return err
@@ -80,7 +86,7 @@ func initEventStore() error {
 		return err
 	}
 
-	s.LogMode(true)
+	//s.LogMode(true)
 	eventStore, err = rdb.NewStore(s)
 	if err != nil {
 		return err
@@ -89,6 +95,7 @@ func initEventStore() error {
 }
 
 func Start() {
+
 	done = make(chan struct{})
 
 	err := initCommandReceiver()
@@ -121,7 +128,10 @@ func Stop() {
 }
 
 func main() {
+	log.SetLevel(log.InfoLevel)
+
 	Start()
+	http.ListenAndServe(":3000", nil)
 	<-done
 }
 

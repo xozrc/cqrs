@@ -38,6 +38,7 @@ func (res *RdbEventStore) Save(partitionKey string, events []*eventsourcing.Even
 func NewStore(db *gorm.DB) (res *RdbEventStore, err error) {
 	res = &RdbEventStore{}
 	res.db = db
+
 	tmpDb := res.db.AutoMigrate(&eventsourcing.EventEntity{})
 	if tmpDb.Error != nil {
 		return nil, tmpDb.Error
