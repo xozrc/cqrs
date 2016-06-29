@@ -3,6 +3,8 @@ package nsq
 import (
 	log "github.com/Sirupsen/logrus"
 
+	"runtime"
+
 	"github.com/nsqio/go-nsq"
 	"github.com/xozrc/cqrs/messaging"
 )
@@ -29,6 +31,7 @@ func (nsqc *NSQConsumer) Stop() error {
 }
 
 func (nsqc *NSQConsumer) HandleMessage(msg *nsq.Message) error {
+	return nil
 	log.Debugf("receive msg %v\n", msg)
 	err := nsqc.handler.Handle(msg.Body)
 	if err != nil {
@@ -41,6 +44,7 @@ func NewConsumer(c *nsq.Consumer, addr string) (nsqc *NSQConsumer, err error) {
 	nsqc = &NSQConsumer{}
 	nsqc.consumer = c
 	nsqc.addr = addr
-	nsqc.consumer.AddConcurrentHandlers(nsqc, 4)
+	n := runtime.GOMAXPROCS(0)
+	nsqc.consumer.AddConcurrentHandlers(nsqc, n)
 	return
 }

@@ -13,6 +13,7 @@ import (
 
 //HandleCreateOrder is a handler for create order command
 func HandleCreateOrder(ctx context.Context, cmd command.Command) error {
+
 	cmd1, ok := cmd.(*ordercommand.CreateOrder)
 	if !ok {
 		return errors.New("command error")
@@ -25,12 +26,12 @@ func HandleCreateOrder(ctx context.Context, cmd command.Command) error {
 	}
 	order := ordereventsourcing.NewOrder()
 	//check if order already exist
-	err := repo.Find(cmd1.OrderId, order)
-	if err != nil && err != eventsourcing.EventSourcedNoFound {
-		return err
-	}
+	// err := repo.Find(cmd1.OrderId, order)
+	// if err != nil && err != eventsourcing.EventSourcedNoFound {
+	// 	return err
+	// }
 
-	err = order.Init(cmd1.OrderId)
+	err := order.Init(cmd1.OrderId)
 	if err != nil {
 		return err
 	}

@@ -47,7 +47,7 @@ var (
 func initCommandReceiver() error {
 	nsqConfig := nsq.NewConfig()
 
-	nsqConfig.MaxInFlight = 1000
+	nsqConfig.MaxInFlight = 2500
 	c, err := nsq.NewConsumer(orderCommandTopic, orderCommandChannel, nsqConfig)
 	if err != nil {
 		return err
